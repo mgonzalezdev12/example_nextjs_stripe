@@ -1,11 +1,12 @@
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { createClient } from "../../../../supabase/server";
-import { Copy, ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Download, FileCode, Palette, GitBranch } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CodeCopyButton from "@/components/code-copy-button";
 
 export default async function ComponentDetailPage({
   params,
@@ -45,7 +46,7 @@ export const GradientButton = ({
       className={\`px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 
       text-white font-medium rounded-lg hover:opacity-90 transition-opacity 
       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-      ${className}\`}
+      \${className}\`}
     >
       {text}
     </button>
@@ -157,6 +158,13 @@ struct GradientButton_Previews: PreviewProvider {
               <TabsList className="mb-4">
                 <TabsTrigger value="react">React</TabsTrigger>
                 <TabsTrigger value="swiftui">SwiftUI</TabsTrigger>
+                {hasAccess && (
+                  <>
+                    <TabsTrigger value="design">Design Files</TabsTrigger>
+                    <TabsTrigger value="github">GitHub</TabsTrigger>
+                    <TabsTrigger value="usage">Usage Guide</TabsTrigger>
+                  </>
+                )}
               </TabsList>
 
               <TabsContent value="react" className="relative">
@@ -173,16 +181,7 @@ struct GradientButton_Previews: PreviewProvider {
                     </code>
                   </pre>
                 </div>
-                {hasAccess && (
-                  <button
-                    className="absolute top-3 right-3 bg-gray-800 hover:bg-gray-700 text-gray-300 p-2 rounded-md"
-                    onClick={() =>
-                      navigator.clipboard.writeText(component.reactCode)
-                    }
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                )}
+                {hasAccess && <CodeCopyButton code={component.reactCode} />}
               </TabsContent>
 
               <TabsContent value="swiftui" className="relative">
@@ -199,17 +198,168 @@ struct GradientButton_Previews: PreviewProvider {
                     </code>
                   </pre>
                 </div>
-                {hasAccess && (
-                  <button
-                    className="absolute top-3 right-3 bg-gray-800 hover:bg-gray-700 text-gray-300 p-2 rounded-md"
-                    onClick={() =>
-                      navigator.clipboard.writeText(component.swiftUICode)
-                    }
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                )}
+                {hasAccess && <CodeCopyButton code={component.swiftUICode} />}
               </TabsContent>
+              
+              {hasAccess && (
+                <>
+                  <TabsContent value="design" className="mt-4">
+                    <div className="bg-white border rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium">Design Assets</h3>
+                        <Button className="flex items-center gap-2">
+                          <Download className="w-4 h-4" />
+                          Download All
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border rounded-md p-4 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Palette className="w-5 h-5 text-blue-600 mr-3" />
+                            <div>
+                              <p className="font-medium">Figma Design File</p>
+                              <p className="text-sm text-gray-500">Complete UI design with components</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            <Download className="w-3 h-3" /> Download
+                          </Button>
+                        </div>
+                        <div className="border rounded-md p-4 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FileCode className="w-5 h-5 text-purple-600 mr-3" />
+                            <div>
+                              <p className="font-medium">Sketch Source File</p>
+                              <p className="text-sm text-gray-500">Original design assets</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            <Download className="w-3 h-3" /> Download
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="github" className="mt-4">
+                    <div className="bg-white border rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium">GitHub Repository</h3>
+                        <Button className="flex items-center gap-2">
+                          <GitBranch className="w-4 h-4" />
+                          Clone Repository
+                        </Button>
+                      </div>
+                      <div className="bg-gray-50 rounded-md p-4 mb-4">
+                        <p className="font-mono text-sm">git clone https://github.com/component-marketplace/gradient-button.git</p>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Repository Details</h4>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex items-center">
+                              <span className="text-gray-500 mr-2">Branch:</span>
+                              <span>main</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 mr-2">Last Updated:</span>
+                              <span>2 days ago</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 mr-2">Stars:</span>
+                              <span>24</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 mr-2">Forks:</span>
+                              <span>8</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="usage" className="mt-4">
+                    <div className="bg-white border rounded-lg p-6">
+                      <h3 className="text-lg font-medium mb-4">Usage Guide</h3>
+                      <div className="space-y-6">
+                        <div>
+                          <h4 className="text-md font-medium mb-2">Installation</h4>
+                          <div className="bg-gray-900 rounded-lg p-3 overflow-x-auto">
+                            <pre className="text-gray-300 font-mono text-sm">
+                              <code>npm install @component-marketplace/gradient-button</code>
+                            </pre>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-md font-medium mb-2">Basic Usage</h4>
+                          <div className="bg-gray-900 rounded-lg p-3 overflow-x-auto relative">
+                            <pre className="text-gray-300 font-mono text-sm">
+                              <code>{`import { GradientButton } from '@component-marketplace/gradient-button';
+
+function MyComponent() {
+  return (
+    <GradientButton 
+      text="Sign Up" 
+      onClick={() => console.log('Button clicked!')} 
+    />
+  );
+}`}</code>
+                            </pre>
+                            <CodeCopyButton code={`import { GradientButton } from '@component-marketplace/gradient-button';
+
+function MyComponent() {
+  return (
+    <GradientButton 
+      text="Sign Up" 
+      onClick={() => console.log('Button clicked!')} 
+    />
+  );
+}`} />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-md font-medium mb-2">Props Reference</h4>
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prop</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                <tr>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">text</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">"Click Me"</td>
+                                  <td className="px-6 py-4 text-sm text-gray-500">The text to display on the button</td>
+                                </tr>
+                                <tr>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">onClick</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">function</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">() => {}</td>
+                                  <td className="px-6 py-4 text-sm text-gray-500">Function called when the button is clicked</td>
+                                </tr>
+                                <tr>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">className</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">""</td>
+                                  <td className="px-6 py-4 text-sm text-gray-500">Additional CSS classes to apply</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </>
+              )}
             </Tabs>
 
             {/* Features */}

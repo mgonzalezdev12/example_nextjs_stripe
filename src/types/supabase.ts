@@ -9,6 +9,186 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      access_permissions: {
+        Row: {
+          can_access: boolean | null
+          created_at: string
+          id: string
+          plan_id: string
+          resource_type: string
+        }
+        Insert: {
+          can_access?: boolean | null
+          created_at?: string
+          id?: string
+          plan_id: string
+          resource_type: string
+        }
+        Update: {
+          can_access?: boolean | null
+          created_at?: string
+          id?: string
+          plan_id?: string
+          resource_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_permissions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      components: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          framework: string
+          github_repo_id: string | null
+          id: string
+          is_premium: boolean | null
+          name: string
+          preview_image_url: string | null
+          react_code: string | null
+          swift_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          framework: string
+          github_repo_id?: string | null
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          preview_image_url?: string | null
+          react_code?: string | null
+          swift_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          framework?: string
+          github_repo_id?: string | null
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          preview_image_url?: string | null
+          react_code?: string | null
+          swift_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_github_repo"
+            columns: ["github_repo_id"]
+            isOneToOne: false
+            referencedRelation: "github_repositories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      github_collaborators: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          permission_level: string | null
+          repository_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          permission_level?: string | null
+          repository_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          permission_level?: string | null
+          repository_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "github_collaborators_repository_id_fkey"
+            columns: ["repository_id"]
+            isOneToOne: false
+            referencedRelation: "github_repositories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      github_repositories: {
+        Row: {
+          created_at: string | null
+          github_repo_id: string | null
+          id: string
+          is_private: boolean | null
+          repo_name: string
+          repo_owner: string
+          repo_url: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          github_repo_id?: string | null
+          id?: string
+          is_private?: boolean | null
+          repo_name: string
+          repo_owner: string
+          repo_url: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          github_repo_id?: string | null
+          id?: string
+          is_private?: boolean | null
+          repo_name?: string
+          repo_owner?: string
+          repo_url?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           amount: number | null
