@@ -33,6 +33,9 @@ export default async function ComponentDetailPage({
     author: "Component Marketplace Team",
     dateAdded: "2023-09-15",
     downloads: 1250,
+    htmlCode: `<button class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+  Click Me
+</button>`,
     reactCode: `import React from 'react';
 
 export const GradientButton = ({ 
@@ -86,8 +89,37 @@ struct GradientButton_Previews: PreviewProvider {
             .previewLayout(.sizeThatFits)
     }
 }`,
+    phpCode: `<?php
+function renderGradientButton($text = "Click Me", $additionalClasses = "") {
+    $classes = "px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 " .
+               "text-white font-medium rounded-lg hover:opacity-90 transition-opacity " .
+               "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 " .
+               $additionalClasses;
+    
+    return "<button class=\"$classes\">$text</button>";
+}
+?>`,
   };
 
+  // Check user's subscription plan
+  let userPlan = "free";
+  
+  if (user) {
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("plan_id, plans:plan_id(name)")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .single();
+    
+    if (subscription?.plans) {
+      const planName = (subscription.plans as any).name;
+      if (planName === "Code Plan") userPlan = "code";
+      else if (planName === "Web Plan") userPlan = "web";
+      else if (planName === "Premium Plan") userPlan = "premium";
+    }
+  }
+  
   const hasAccess = !component.isPremium || user !== null;
 
   return (
@@ -143,10 +175,10 @@ struct GradientButton_Previews: PreviewProvider {
                 <div className="text-sm text-gray-600 mb-4">
                   {component.downloads} downloads
                 </div>
-                {!hasAccess && (
+                {component.isPremium && userPlan === "free" && (
                   <Link href="/pricing">
                     <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                      Upgrade to Pro
+                      Upgrade to Access
                     </Button>
                   </Link>
                 )}
@@ -154,149 +186,198 @@ struct GradientButton_Previews: PreviewProvider {
             </div>
 
             {/* Code Tabs */}
-            <Tabs defaultValue="react" className="mt-6">
+            <Tabs defaultValue="html" className="mt-6">
               <TabsList className="mb-4">
+                <TabsTrigger value="html">HTML</TabsTrigger>
                 <TabsTrigger value="react">React</TabsTrigger>
                 <TabsTrigger value="swiftui">SwiftUI</TabsTrigger>
-                {hasAccess && (
-                  <>
-                    <TabsTrigger value="design">Design Files</TabsTrigger>
-                    <TabsTrigger value="github">GitHub</TabsTrigger>
-                    <TabsTrigger value="usage">Usage Guide</TabsTrigger>
-                  </>
-                )}
+                <TabsTrigger value="design">Design Files</TabsTrigger>
+                <TabsTrigger value="php">PHP</TabsTrigger>
+                <TabsTrigger value="github">GitHub</TabsTrigger>
+                <TabsTrigger value="usage">Usage Guide</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="html" className="relative">
+                <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-gray-300 font-mono text-sm">
+                    <code>{component.htmlCode}</code>
+                  </pre>
+                </div>
+                <CodeCopyButton code={component.htmlCode} />
+              </TabsContent>
 
               <TabsContent value="react" className="relative">
                 <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
                   <pre className="text-gray-300 font-mono text-sm">
                     <code>
-                      {hasAccess
+                      {(userPlan === "code" || userPlan === "web" || userPlan === "premium")
                         ? component.reactCode
                         : component.reactCode
                             .split("\n")
                             .slice(0, 8)
                             .join("\n") +
-                          "\n\n// Upgrade to Pro to access the full code"}
+                          "\n\n// Upgrade to Code Plan or higher to access the full code"}
                     </code>
                   </pre>
                 </div>
-                {hasAccess && <CodeCopyButton code={component.reactCode} />}
+                {(userPlan === "code" || userPlan === "web" || userPlan === "premium") && 
+                  <CodeCopyButton code={component.reactCode} />
+                }
               </TabsContent>
 
               <TabsContent value="swiftui" className="relative">
                 <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
                   <pre className="text-gray-300 font-mono text-sm">
                     <code>
-                      {hasAccess
+                      {(userPlan === "code" || userPlan === "web" || userPlan === "premium")
                         ? component.swiftUICode
                         : component.swiftUICode
                             .split("\n")
                             .slice(0, 8)
                             .join("\n") +
-                          "\n\n// Upgrade to Pro to access the full code"}
+                          "\n\n// Upgrade to Code Plan or higher to access the full code"}
                     </code>
                   </pre>
                 </div>
-                {hasAccess && <CodeCopyButton code={component.swiftUICode} />}
+                {(userPlan === "code" || userPlan === "web" || userPlan === "premium") && 
+                  <CodeCopyButton code={component.swiftUICode} />
+                }
               </TabsContent>
               
-              {hasAccess && (
-                <>
-                  <TabsContent value="design" className="mt-4">
-                    <div className="bg-white border rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium">Design Assets</h3>
-                        <Button className="flex items-center gap-2">
-                          <Download className="w-4 h-4" />
-                          Download All
+              <TabsContent value="php" className="relative">
+                <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-gray-300 font-mono text-sm">
+                    <code>
+                      {(userPlan === "web" || userPlan === "premium")
+                        ? component.phpCode
+                        : "// Upgrade to Web Plan or higher to access PHP code"}
+                    </code>
+                  </pre>
+                </div>
+                {(userPlan === "web" || userPlan === "premium") && 
+                  <CodeCopyButton code={component.phpCode} />
+                }
+              </TabsContent>
+              
+              <TabsContent value="design" className="mt-4">
+                {(userPlan === "code" || userPlan === "web" || userPlan === "premium") ? (
+                  <div className="bg-white border rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium">Design Assets</h3>
+                      <Button className="flex items-center gap-2">
+                        <Download className="w-4 h-4" />
+                        Download All
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="border rounded-md p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <Palette className="w-5 h-5 text-blue-600 mr-3" />
+                          <div>
+                            <p className="font-medium">Figma Design File</p>
+                            <p className="text-sm text-gray-500">Complete UI design with components</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
+                          <Download className="w-3 h-3" /> Download
                         </Button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="border rounded-md p-4 flex items-center justify-between">
-                          <div className="flex items-center">
-                            <Palette className="w-5 h-5 text-blue-600 mr-3" />
-                            <div>
-                              <p className="font-medium">Figma Design File</p>
-                              <p className="text-sm text-gray-500">Complete UI design with components</p>
-                            </div>
+                      <div className="border rounded-md p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <FileCode className="w-5 h-5 text-purple-600 mr-3" />
+                          <div>
+                            <p className="font-medium">Sketch Source File</p>
+                            <p className="text-sm text-gray-500">Original design assets</p>
                           </div>
-                          <Button variant="outline" size="sm" className="flex items-center gap-1">
-                            <Download className="w-3 h-3" /> Download
-                          </Button>
                         </div>
-                        <div className="border rounded-md p-4 flex items-center justify-between">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
+                          <Download className="w-3 h-3" /> Download
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white border rounded-lg p-6 text-center">
+                    <h3 className="text-lg font-medium mb-4">Design Files Access</h3>
+                    <p className="text-gray-600 mb-4">Upgrade to Code Plan or higher to access design files</p>
+                    <Link href="/pricing">
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        Upgrade Now
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="github" className="mt-4">
+                {(userPlan === "web" || userPlan === "premium") ? (
+                  <div className="bg-white border rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium">GitHub Repository</h3>
+                      <Button className="flex items-center gap-2">
+                        <GitBranch className="w-4 h-4" />
+                        Clone Repository
+                      </Button>
+                    </div>
+                    <div className="bg-gray-50 rounded-md p-4 mb-4">
+                      <p className="font-mono text-sm">git clone https://github.com/component-marketplace/gradient-button.git</p>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Repository Details</h4>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
                           <div className="flex items-center">
-                            <FileCode className="w-5 h-5 text-purple-600 mr-3" />
-                            <div>
-                              <p className="font-medium">Sketch Source File</p>
-                              <p className="text-sm text-gray-500">Original design assets</p>
-                            </div>
+                            <span className="text-gray-500 mr-2">Branch:</span>
+                            <span>main</span>
                           </div>
-                          <Button variant="outline" size="sm" className="flex items-center gap-1">
-                            <Download className="w-3 h-3" /> Download
-                          </Button>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 mr-2">Last Updated:</span>
+                            <span>2 days ago</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 mr-2">Stars:</span>
+                            <span>24</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 mr-2">Forks:</span>
+                            <span>8</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="github" className="mt-4">
-                    <div className="bg-white border rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium">GitHub Repository</h3>
-                        <Button className="flex items-center gap-2">
-                          <GitBranch className="w-4 h-4" />
-                          Clone Repository
-                        </Button>
-                      </div>
-                      <div className="bg-gray-50 rounded-md p-4 mb-4">
-                        <p className="font-mono text-sm">git clone https://github.com/component-marketplace/gradient-button.git</p>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Repository Details</h4>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex items-center">
-                              <span className="text-gray-500 mr-2">Branch:</span>
-                              <span>main</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="text-gray-500 mr-2">Last Updated:</span>
-                              <span>2 days ago</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="text-gray-500 mr-2">Stars:</span>
-                              <span>24</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="text-gray-500 mr-2">Forks:</span>
-                              <span>8</span>
-                            </div>
-                          </div>
+                  </div>
+                ) : (
+                  <div className="bg-white border rounded-lg p-6 text-center">
+                    <h3 className="text-lg font-medium mb-4">GitHub Repository Access</h3>
+                    <p className="text-gray-600 mb-4">Upgrade to Web Plan or higher to access GitHub repositories</p>
+                    <Link href="/pricing">
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        Upgrade Now
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="usage" className="mt-4">
+                {userPlan === "premium" ? (
+                  <div className="bg-white border rounded-lg p-6">
+                    <h3 className="text-lg font-medium mb-4">Usage Guide</h3>
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-md font-medium mb-2">Installation</h4>
+                        <div className="bg-gray-900 rounded-lg p-3 overflow-x-auto">
+                          <pre className="text-gray-300 font-mono text-sm">
+                            <code>npm install @component-marketplace/gradient-button</code>
+                          </pre>
                         </div>
                       </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="usage" className="mt-4">
-                    <div className="bg-white border rounded-lg p-6">
-                      <h3 className="text-lg font-medium mb-4">Usage Guide</h3>
-                      <div className="space-y-6">
-                        <div>
-                          <h4 className="text-md font-medium mb-2">Installation</h4>
-                          <div className="bg-gray-900 rounded-lg p-3 overflow-x-auto">
-                            <pre className="text-gray-300 font-mono text-sm">
-                              <code>npm install @component-marketplace/gradient-button</code>
-                            </pre>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="text-md font-medium mb-2">Basic Usage</h4>
-                          <div className="bg-gray-900 rounded-lg p-3 overflow-x-auto relative">
-                            <pre className="text-gray-300 font-mono text-sm">
-                              <code>{`import { GradientButton } from '@component-marketplace/gradient-button';
+                      
+                      <div>
+                        <h4 className="text-md font-medium mb-2">Basic Usage</h4>
+                        <div className="bg-gray-900 rounded-lg p-3 overflow-x-auto relative">
+                          <pre className="text-gray-300 font-mono text-sm">
+                            <code>{`import { GradientButton } from '@component-marketplace/gradient-button';
 
 function MyComponent() {
   return (
@@ -306,8 +387,8 @@ function MyComponent() {
     />
   );
 }`}</code>
-                            </pre>
-                            <CodeCopyButton code={`import { GradientButton } from '@component-marketplace/gradient-button';
+                          </pre>
+                          <CodeCopyButton code={`import { GradientButton } from '@component-marketplace/gradient-button';
 
 function MyComponent() {
   return (
@@ -317,49 +398,58 @@ function MyComponent() {
     />
   );
 }`} />
-                          </div>
                         </div>
-                        
-                        <div>
-                          <h4 className="text-md font-medium mb-2">Props Reference</h4>
-                          <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                              <thead className="bg-gray-50">
-                                <tr>
-                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prop</th>
-                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
-                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                </tr>
-                              </thead>
-                              <tbody className="bg-white divide-y divide-gray-200">
-                                <tr>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">text</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">"Click Me"</td>
-                                  <td className="px-6 py-4 text-sm text-gray-500">The text to display on the button</td>
-                                </tr>
-                                <tr>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">onClick</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">function</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">() => {}</td>
-                                  <td className="px-6 py-4 text-sm text-gray-500">Function called when the button is clicked</td>
-                                </tr>
-                                <tr>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">className</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">""</td>
-                                  <td className="px-6 py-4 text-sm text-gray-500">Additional CSS classes to apply</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-md font-medium mb-2">Props Reference</h4>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prop</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              <tr>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">text</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">"Click Me"</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">The text to display on the button</td>
+                              </tr>
+                              <tr>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">onClick</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">function</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">() => {}</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">Function called when the button is clicked</td>
+                              </tr>
+                              <tr>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">className</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">""</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">Additional CSS classes to apply</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-                </>
-              )}
+                  </div>
+                ) : (
+                  <div className="bg-white border rounded-lg p-6 text-center">
+                    <h3 className="text-lg font-medium mb-4">Usage Guide Access</h3>
+                    <p className="text-gray-600 mb-4">Upgrade to Premium Plan to access detailed usage guides</p>
+                    <Link href="/pricing">
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        Upgrade Now
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
 
             {/* Features */}
