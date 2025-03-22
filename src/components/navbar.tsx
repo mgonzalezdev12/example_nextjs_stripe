@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "../../supabase/server";
 import { Button } from "./ui/button";
-import { Code, Search, UserCircle } from "lucide-react";
+import { Code, Search, UserCircle, Zap } from "lucide-react";
 import UserProfile from "./user-profile";
 
 export default async function Navbar() {
@@ -12,16 +12,13 @@ export default async function Navbar() {
   } = await (await supabase).auth.getUser();
 
   return (
-    <nav className="w-full border-b border-gray-200 bg-white py-4">
+    <nav className="w-full border-b border-black bg-black py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center space-x-8">
-          <Link
-            href="/"
-            prefetch
-            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-          >
-            ComponentMarket
-          </Link>
+        <Link href="/" className="flex items-center gap-2 text-xl font-semibold text-white">
+        <Zap className="w-6 h-6 text-green-600" />
+        BizViewCode
+      </Link>
 
           <div className="hidden md:flex space-x-6">
             <Link

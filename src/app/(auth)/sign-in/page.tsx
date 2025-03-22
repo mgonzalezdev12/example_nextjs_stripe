@@ -5,6 +5,8 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { Mail } from "lucide-react";
+import { SocialAuthButtons } from "@/components/social-auth-buttons";
 
 interface LoginProps {
   searchParams: Promise<Message>;
@@ -83,8 +85,22 @@ export default async function SignInPage({ searchParams }: LoginProps) {
               pendingText="Signing in..."
               formAction={signInAction}
             >
-              Sign in
+              <Mail className="mr-2 h-4 w-4" />
+              Sign in with Email
             </SubmitButton>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <SocialAuthButtons />
 
             <FormMessage message={message} />
           </form>
