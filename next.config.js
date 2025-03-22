@@ -6,6 +6,10 @@ const nextConfig = {
   },
 };
 
+// Fix for PORT=null environment variable
+const { PORT } = process.env;
+delete process.env.PORT;
+
 if (process.env.NEXT_PUBLIC_TEMPO) {
   nextConfig["experimental"] = {
     // NextJS 13.4.8 up to 14.1.3:

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { supabase } from "../../supabase/supabase";
+import { createClient } from "../supabase/client";
 
 interface Component {
   id: number;

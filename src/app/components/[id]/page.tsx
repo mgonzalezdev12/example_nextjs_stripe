@@ -2,6 +2,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { createClient } from "../../../../supabase/server";
 import { ArrowLeft, Check, Download, FileCode, Palette, GitBranch } from "lucide-react";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ export default async function ComponentDetailPage({
 }: {
   params: { id: string };
 }) {
+  // Redirect to the new route structure
+  return redirect(`/components/react/${params.id}`);
   const supabase = await createClient();
   const {
     data: { user },
